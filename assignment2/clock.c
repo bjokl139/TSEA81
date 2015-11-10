@@ -6,8 +6,11 @@
 #include <semaphore.h>
 
 #include "si_ui.h"
+#include "clock.h"
 
 /* semaphores */
+
+sem_t tick;
 
 /* time data type */ 
 typedef struct 
@@ -48,14 +51,14 @@ void clock_init(void)
     Clock.time.seconds = 0; 
 
     Clock.alarm_time.hours = 0; 
-    Clock.alarm_time.minutes = 0; 
+    Clock.alarm_time.minutes = 0;
     Clock.alarm_time.seconds = 0; 
     
     /* alarm is not enabled */ 
     Clock.alarm_enabled = 0; 
 
     /* initialise semaphores */ 
-    pthread_mutex_init(&Clock.mutex, NULL); 
+    pthread_mutex_init(&Clock.mutex, NULL);
     sem_init(&Clock.start_alarm, 0, 0); 
 }
 
@@ -69,4 +72,84 @@ void clock_set_time(int hours, int minutes, int seconds)
     Clock.time.seconds = seconds; 
 
     pthread_mutex_unlock(&Clock.mutex); 
+}
+
+void increment_time(){
+  pthread_mutex_lock(&Clock.mutex);
+  
+  Clock.time.seconds++; 
+  if (Clock.time.seconds > 59){
+    Clock.time.seconds = 0; 
+    Clock.time.minutes++; 
+    if (Clock.time.minutes > 59)
+      {
+	Clock.time.minutes = 0; 
+	Clock.time.hours++; 
+	if (Clock.time.hours > 23)
+	  {
+	    Clock.time.hours = 0; 
+	  }
+      }
+  }
+
+  pthread_mutex_unlock(&Clock.mutex)
+  
+}
+
+void check_alarm(){
+  if (Clock.time.seconds == clock.alarm_time.seconds && 
+      Clock.time.minutes == Clock.alarm_time.minutes && 
+      Clock.time.hours == Clock.alarm_time.hours){
+    sem_post(&Clock.start_alarm);
+  }
+}
+
+void ui_thread(){
+  /* message array */ 
+    char message[SI_UI_MAX_MESSAGE_SIZE];
+    si_ui_set_size(400, 200);
+    
+    /* time read from user interface */ 
+    int hours, minutes, seconds; 
+    
+    while(1){
+      si_ui_recieve(message);
+
+      if(strncmp(message, "set", 3) == 0){
+	//set %d %d %d
+      }
+      else if(strncmp(message, "alarm", 5) == 0){
+	//alarm %d %d %d
+      }
+      else if(strncmp(message, "reset") == 0){
+	//reset
+      }
+      else if(strncmp(message, "exit") == 0){
+	exit(0);
+      }
+    }
+}
+
+void update_alarm_thread(){ 
+}
+
+void timekeeper_thread(){
+  while(1){
+    usleep(1000000); //1Hz
+    sem_post(&tick);
+  }
+}
+
+
+
+int main(void){
+
+  si_ui_init();
+
+  clock_init();
+  
+  sem_init(&tick,0,0);
+
+  /* tasks */
+
 }
