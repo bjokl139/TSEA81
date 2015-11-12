@@ -6,7 +6,9 @@
 #include <semaphore.h>
 
 #include "si_ui.h"
+#include "si_comm.h"
 #include "clock.h"
+#include "display.h"
 
 /* semaphores */
 
@@ -41,6 +43,8 @@ typedef struct
 /* the actual clock */ 
 static clock_data_type Clock; 
 
+int show_alarm_message = 0;
+
 /* clock_init: initialise clock */ 
 void clock_init(void)
 {
@@ -57,7 +61,7 @@ void clock_init(void)
     /* alarm is not enabled */ 
     Clock.alarm_enabled = 0; 
 
-    /* initialise semaphores */ 
+    /* initialise semaphores */
     pthread_mutex_init(&Clock.mutex, NULL);
     sem_init(&Clock.start_alarm, 0, 0); 
 }
@@ -71,6 +75,17 @@ void clock_set_time(int hours, int minutes, int seconds)
     Clock.time.minutes = minutes; 
     Clock.time.seconds = seconds; 
 
+    pthread_mutex_unlock(&Clock.mutex); 
+}
+
+void alarm_set_time(int hours, int minutes, int seconds)
+{
+    pthread_mutex_lock(&Clock.mutex); 
+
+    Clock.alarm_time.hours = hours; 
+    Clock.alarm_time.minutes = minutes; 
+    Clock.alarm_time.seconds = seconds; 
+    Clock.alarm_enabled = 1;
     pthread_mutex_unlock(&Clock.mutex); 
 }
 
@@ -91,65 +106,133 @@ void increment_time(){
 	  }
       }
   }
-
-  pthread_mutex_unlock(&Clock.mutex)
   
+  pthread_mutex_unlock(&Clock.mutex);
 }
 
-void check_alarm(){
-  if (Clock.time.seconds == clock.alarm_time.seconds && 
-      Clock.time.minutes == Clock.alarm_time.minutes && 
-      Clock.time.hours == Clock.alarm_time.hours){
-    sem_post(&Clock.start_alarm);
+/* time_ok: returns nonzero if hours, minutes and seconds represents a valid time */ 
+int time_ok(int hours, int minutes, int seconds)
+{
+    return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59 && 
+        seconds >= 0 && seconds <= 59; 
+}
+
+void* message_thread(void* arg){
+  /* message array */ 
+  char message[SI_UI_MAX_MESSAGE_SIZE];
+  int hours, minutes, seconds;
+  
+  while(1){
+    si_ui_receive(message);
+    
+    if(strncmp(message, "set", 3) == 0){
+      //set %d %d %d
+      sscanf(message,"set %d %d %d", &hours, &minutes, &seconds); 
+      if(time_ok(hours, minutes, seconds)){
+	  clock_set_time(hours, minutes, seconds);
+	}
+	else{
+	  si_ui_show_error("Illegal value for hours, minutes or seconds");
+	}
+    }
+    else if(strncmp(message, "alarm", 5) == 0){
+      //alarm %d %d %d
+      sscanf(message,"alarm %d %d %d", &hours, &minutes, &seconds); 
+      if(time_ok(hours, minutes, seconds)){
+	  alarm_set_time(hours, minutes, seconds);
+	  display_alarm_time(hours, minutes, seconds);
+	}
+	else{
+	  si_ui_show_error("Illegal value for hours, minutes or seconds");
+	}
+    }
+    else if(strcmp(message, "reset") == 0){
+      pthread_mutex_lock(&Clock.mutex);
+      Clock.alarm_enabled = 0;
+      pthread_mutex_unlock(&Clock.mutex);
+      erase_alarm_time();
+      erase_alarm_text();
+    }
+    else if(strcmp(message, "exit") == 0){
+      exit(0);
+    }
   }
 }
 
-void ui_thread(){
-  /* message array */ 
-    char message[SI_UI_MAX_MESSAGE_SIZE];
-    si_ui_set_size(400, 200);
+void* logic_thread(void* arg){
+  time_data_type time, alarm_time;
+  int alarm_enabled;
+  while(1){
+    sem_wait(&tick);
     
-    /* time read from user interface */ 
-    int hours, minutes, seconds; 
+    increment_time();
     
-    while(1){
-      si_ui_recieve(message);
+    pthread_mutex_lock(&Clock.mutex);
+    time = Clock.time;
+    alarm_time = Clock.alarm_time;
+    alarm_enabled = Clock.alarm_enabled;
+    pthread_mutex_unlock(&Clock.mutex);
+    
+    display_time(time.hours, time.minutes, time.seconds);
+    
+    if(time.hours == alarm_time.hours &&
+       time.minutes == alarm_time.minutes &&
+       time.seconds == alarm_time.seconds &&
+       alarm_enabled){
+      sem_post(&Clock.start_alarm);
+    }
+  }
+}
 
-      if(strncmp(message, "set", 3) == 0){
-	//set %d %d %d
-      }
-      else if(strncmp(message, "alarm", 5) == 0){
-	//alarm %d %d %d
-      }
-      else if(strncmp(message, "reset") == 0){
-	//reset
-      }
-      else if(strncmp(message, "exit") == 0){
-	exit(0);
-      }
+void* update_alarm_thread(void* arg){ 
+  int alarm_enabled;
+  while(1){
+    sem_wait(&Clock.start_alarm);
+    while(1){
+      display_alarm_text();
+      usleep(1500000);
+      pthread_mutex_lock(&Clock.mutex);
+      alarm_enabled = Clock.alarm_enabled;
+      pthread_mutex_unlock(&Clock.mutex);
+      
+      if(!alarm_enabled){break;}
+    }
+  }
+}
+
+
+void* timekeeper_thread(void* arg){
+    while(1){
+    usleep(1000000);
+    sem_post(&tick);  
     }
 }
-
-void update_alarm_thread(){ 
-}
-
-void timekeeper_thread(){
-  while(1){
-    usleep(1000000); //1Hz
-    sem_post(&tick);
-  }
-}
-
-
 
 int main(void){
 
   si_ui_init();
-
+  si_ui_set_size(400, 200);
+  
   clock_init();
+  display_init();
   
   sem_init(&tick,0,0);
 
   /* tasks */
+  pthread_t timekeeper_thread_handle;
+  pthread_t logic_thread_handle;
+  pthread_t message_thread_handle;
+  pthread_t update_alarm_thread_handle;
 
+  pthread_create(&timekeeper_thread_handle, NULL, timekeeper_thread, 0);
+  pthread_create(&logic_thread_handle, NULL, logic_thread, 0);
+  pthread_create(&message_thread_handle, NULL, message_thread, 0);
+  pthread_create(&update_alarm_thread_handle, NULL, update_alarm_thread, 0);
+
+  pthread_join(timekeeper_thread_handle, NULL);
+  pthread_join(logic_thread_handle, NULL);
+  pthread_join(message_thread_handle, NULL);
+  pthread_join(update_alarm_thread_handle, NULL);
+  /* will never be here! */ 
+  return 0;
 }
