@@ -169,6 +169,31 @@ static int n_passengers_in_lift(lift_type lift)
    shall move again. */
 void lift_has_arrived(lift_type lift)
 {
+  pthread_mutex_lock(&lift->mutex);
+  pthread_cond_broadcast(&lift->change);
+  pthread_mutex_unlock(&lift->mutex);
+}
+
+int lift_should_stop(lift_type lift)
+{
+  int should_stop = 0;
+  
+  pthread_mutex_lock(&lift->mutex);
+
+  for (i = 0; i < MAX_N_PASSENGERS; i ++){
+    if (lift->passengers_in_lift[i].id != NO_ID)
+      if(lift->passengers_in_lift[i].destination_floor == lift->floor)
+	should_stop = 1;
+  }
+  for (i = 0; i < MAX_N_PASSENGERS; i ++){
+    if ((lift->passengers_to_enter[lift->floor][i].id != NO_ID) && lift->n_passengers < MAX_N_PASSENGERS){
+      should_stop = 1;
+    }
+  }
+
+  pthread_mutex_unlock(&lift->mutex);
+  
+  return should_stop;
 }
 
 /* --- functions related to lift task END --- */
@@ -222,8 +247,7 @@ static void enter_floor(
 
 /* leave_floor: makes a person with id id at enter_floor leave 
    enter_floor */ 
-static void leave_floor(
-    lift_type lift, int id, int enter_floor)
+static void leave_floor(lift_type lift, int id, int enter_floor)
 
 /* fig_end lift_c_prot */ 
 {
@@ -250,6 +274,22 @@ static void leave_floor(
     /* leave floor at index floor_index */ 
     lift->persons_to_enter[enter_floor][floor_index].id = NO_ID; 
     lift->persons_to_enter[enter_floor][floor_index].to_floor = NO_FLOOR; 
+}
+
+static void enter_lift(lift_type lift, int id, int destination_floor)
+{
+  int i;
+  int sucess = 0;
+  for(i = 0; i < MAX_N_PASSENGERS; i++){
+    if(lift->passengers_in_lift[i].id == NO_ID){
+      lift->passengers_in_lift[i].id = id;
+      lift->passengers_in_lift[i].to_floor = destintation_floor;
+      sucsess = 1;
+      break;
+    }
+  }
+  
+  if(!sucess){lift_panic("Could not enter lift!");}
 }
 
 /* MONITOR function lift_travel: performs a journey with the lift
