@@ -58,7 +58,7 @@ static void *lift_thread(void *unused)
 	while(1){
 	  lift_next_floor(Lift, &next_floor, &change_direction);
 	  lift_move(Lift, next_floor, change_direction);
-	  lift_has_arrived(Lift);
+	  //lift_has_arrived(Lift);
 	}
 	return NULL;
 }
