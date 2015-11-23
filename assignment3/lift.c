@@ -177,16 +177,17 @@ void lift_has_arrived(lift_type lift)
 int lift_should_stop(lift_type lift)
 {
   int should_stop = 0;
-  
+  int i;
+
   pthread_mutex_lock(&lift->mutex);
 
   for (i = 0; i < MAX_N_PASSENGERS; i ++){
     if (lift->passengers_in_lift[i].id != NO_ID)
-      if(lift->passengers_in_lift[i].destination_floor == lift->floor)
+      if(lift->passengers_in_lift[i].to_floor == lift->floor)
 	should_stop = 1;
   }
   for (i = 0; i < MAX_N_PASSENGERS; i ++){
-    if ((lift->passengers_to_enter[lift->floor][i].id != NO_ID) && lift->n_passengers < MAX_N_PASSENGERS){
+    if ((lift->persons_to_enter[lift->floor][i].id != NO_ID) && n_passengers_in_lift(lift) < MAX_N_PASSENGERS){
       should_stop = 1;
     }
   }
@@ -283,8 +284,8 @@ static void enter_lift(lift_type lift, int id, int destination_floor)
   for(i = 0; i < MAX_N_PASSENGERS; i++){
     if(lift->passengers_in_lift[i].id == NO_ID){
       lift->passengers_in_lift[i].id = id;
-      lift->passengers_in_lift[i].to_floor = destintation_floor;
-      sucsess = 1;
+      lift->passengers_in_lift[i].to_floor = destination_floor;
+      sucess = 1;
       break;
     }
   }
