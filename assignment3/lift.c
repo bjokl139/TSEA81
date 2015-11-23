@@ -143,8 +143,9 @@ void lift_move(lift_type lift, int next_floor, int change_direction)
     /* draw, since a change has occurred */ 
     draw_lift(lift);
     
+    lift_has_arrived(lift);    
     while(lift_should_stop(lift)){
-      lift_has_arrived(lift);
+
       pthread_cond_wait(&lift->change, &lift->mutex);
     }
 
