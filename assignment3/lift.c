@@ -143,12 +143,6 @@ void lift_move(lift_type lift, int next_floor, int change_direction)
     /* draw, since a change has occurred */ 
     draw_lift(lift);
     
-    lift_has_arrived(lift);    
-    while(lift_should_stop(lift)){
-
-      pthread_cond_wait(&lift->change, &lift->mutex);
-    }
-
     /* release lift */ 
     pthread_mutex_unlock(&lift->mutex);
 }
@@ -173,10 +167,6 @@ static int n_passengers_in_lift(lift_type lift)
    when the lift has arrived at the next floor. This function indicates
    to other tasks that the lift has arrived, and then waits until the lift
    shall move again. */
-void lift_has_arrived(lift_type lift)
-{
-  pthread_cond_broadcast(&lift->change);
-}
 
 int lift_should_stop(lift_type lift)
 {
@@ -196,6 +186,15 @@ int lift_should_stop(lift_type lift)
 
   return should_stop;
 }
+
+void lift_has_arrived(lift_type lift)
+{
+  pthread_cond_broadcast(&lift->change);
+  while(lift_should_stop(lift)){
+    pthread_cond_wait(&lift->change, &lift->mutex);
+  }
+}
+
 
 /* --- functions related to lift task END --- */
 
