@@ -209,7 +209,7 @@ void uicommand_process(void)
 		// Read a message from the GUI
 		si_ui_receive(message);
 		if(!strcmp(message, "new")){
-		  if(current_person_id < MAX_N_PERSONS - 1){
+		  if(current_person_id < MAX_N_PERSONS){
 		    
 		    pid_t tmp_pid = fork();
 		    if (tmp_pid == 0){
@@ -223,18 +223,29 @@ void uicommand_process(void)
 			// * Check that we don't create too many persons
 			// * fork and create a new person process (and
 			// *  record the new pid in person_pid[])
+		}else if(!strcmp(message,"test")){
+		  int j;
+		  for(j = 0; j<MAX_N_PERSONS; j++){
+		   pid_t tmp_pid = fork();
+		    if (tmp_pid == 0){
+		      person_process(current_person_id);
+		    } else{
+		      person_pid[current_person_id] = tmp_pid;
+		      current_person_id ++;
+		    }
+		  }
 		}else if(!strcmp(message, "exit")){
-			// The code below sends the SIGINT signal to
-			// all processes involved in this application
-			// except for the uicommand process itself
-			// (which is exited by calling exit())
-			kill(uidraw_pid, SIGINT);
-			kill(lift_pid, SIGINT);
+		  // The code below sends the SIGINT signal to
+		  // all processes involved in this application
+		  // except for the uicommand process itself
+		  // (which is exited by calling exit())
+		  kill(uidraw_pid, SIGINT);
+		  kill(lift_pid, SIGINT);
 			kill(liftmove_pid, SIGINT);
 			for(i=0; i < MAX_N_PERSONS; i++){
-				if(person_pid[i] > 0){
-					kill(person_pid[i], SIGINT);
-				}
+			  if(person_pid[i] > 0){
+			    kill(person_pid[i], SIGINT);
+			  }
 			}
 			exit(0);
 		}
