@@ -10,52 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/time.h>
-#include <math.h>
 
-#define ITERATIONS 10000
 
-/* Statistics*/
-int travel_count = 0;
-long long int travel_times[ITERATIONS];
-
-void do_math(){
-  int i;
-  long long int average_time = 0;
-  long long int min = travel_times[0];
-  long long int max = travel_times[0];
-  
-  for(i = 0; i < ITERATIONS; i++){
-    average_time += travel_times[i];
-    if(min > travel_times[i])
-      min = travel_times[i];
-    if(max < travel_times[i])
-      max = travel_times[i];
-  }
-  average_time = average_time/ITERATIONS;
-  
-  long long int stddev_iter = 0;
-  for(i = 0; i < ITERATIONS; i++){
-    stddev_iter += pow(average_time - travel_times[i],2); 
-  }
-  int stddev = sqrt(stddev_iter/ITERATIONS);
-  
-  printf("Mean: %d\n", average_time);
-  printf("Stddev: %d\n", stddev);
-  printf("Min: %d\n", min);
-  printf("Max: %d\n", max);
-
-  FILE *f = fopen("many_cv.txt", "w");
-  if (f == NULL)
-    {
-      printf("Error opening file!\n");
-      exit(1);
-    }
-  for (i = 0; i < ITERATIONS; i++){
-    fprintf(f, "%d\n", travel_times[i]);
-  }
-  fclose(f);
-}
 
 /* panic function, to be called when fatal errors occur */ 
 static void lift_panic(const char message[])
@@ -382,12 +338,6 @@ static void exit_lift(lift_type lift, int id){
    starting at from_floor, and ending at to_floor */ 
 void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
 {
-  struct timeval starttime;
-  struct timeval stoptime;
-  long long int timediff;
-  int time_pos = 0;
-  
-  gettimeofday(&starttime, NULL);
   pthread_mutex_lock(&lift->mutex);
   enter_floor(lift, id, from_floor);
   //draw_lift(lift);
@@ -458,27 +408,10 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
     break;
   }
 
-  if(travel_count<ITERATIONS){
-    
-    time_pos = travel_count;
-    travel_count++;
-  }else{
-    while(1);
-  }
+  
 
   pthread_mutex_unlock(&lift->mutex);
-  
-  
-  gettimeofday(&stoptime, NULL);
-  timediff = (stoptime.tv_sec*1000000ULL + stoptime.tv_usec) -
-    (starttime.tv_sec*1000000ULL + starttime.tv_usec);
-  travel_times[time_pos] = timediff;
-  
-  if(time_pos == ITERATIONS - 1){
-    do_math();
-    lift_delete(lift);
-    exit(0);
-  }
+
 }
 
 /* --- functions related to person task END --- */

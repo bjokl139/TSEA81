@@ -6,9 +6,13 @@
 #include <unistd.h>
 #include "lift.h"
 #include "si_ui.h"
+#include <sys/time.h>
+#include <math.h>
 
+#define ITERATIONS 100
 pthread_t passenger_thread_handles[MAX_N_PERSONS];
 int passenger_ids[MAX_N_PERSONS];
+long long int travel_time_array[MAX_N_PERSONS][ITERATIONS];
 
 // Unfortunately the rand() function is not thread-safe. However, the
 // rand_r() function is thread-safe, but need a pointer to an int to
@@ -18,6 +22,23 @@ int passenger_ids[MAX_N_PERSONS];
 // rand_r() which should work in the environment encountered in
 // assignment 3.
 //
+
+void write_to_file(){
+  int i,j;
+  FILE *f = fopen("one_cv.txt", "w");
+  if (f == NULL)
+    {
+      printf("Error opening file!\n");
+      exit(1);
+    }
+  for (i = 0; i <  MAX_N_PERSONS; i++){
+    for(j = 0; j <ITERATIONS; j++){
+      fprintf(f, "%d ", travel_time_array[i][j]);
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
+}
 
 static unsigned int rand_r_state[MAX_N_PERSONS];
 // Get a random value between 0 and maximum_value. The passenger_id
@@ -73,8 +94,8 @@ static void *passenger_thread(void *idptr)
 
 	int *tmp = (int *) idptr;
 	int id = *tmp;
-
-	while(1){
+	int travel_counter = 0;
+	for(travel_counter = 0; travel_counter < ITERATIONS; travel_counter++){
 	  
 	  // * Select random floors
 	  int start_floor = get_random_value(id, N_FLOORS-1);
@@ -84,12 +105,22 @@ static void *passenger_thread(void *idptr)
 	  }
 	  
 	  // * Travel between these floors
+	  struct timeval starttime;
+	  struct timeval stoptime;
+	  long long int timediff;
+	  int time_pos = 0;
+	  
+	  gettimeofday(&starttime, NULL);
+
 	  lift_travel(Lift, id, start_floor, destination_floor);
-	 
+
+	  gettimeofday(&stoptime, NULL);
+	  timediff = (stoptime.tv_sec*1000000ULL + stoptime.tv_usec) -
+	    (starttime.tv_sec*1000000ULL + starttime.tv_usec);
+	  travel_time_array[id][travel_counter] = timediff;
+
 	  // * Wait a little while
 	  //usleep(5000000);
-	  
-		
 		
 	  }
 	  return NULL;
@@ -150,6 +181,18 @@ int main(int argc, char **argv)
   pthread_create(&lift_thread_handle,NULL,lift_thread,0);
   pthread_create(&user_thread_handle,NULL,user_thread,0);
   
+  int current_passenger_id = 0;
+  for (i = current_passenger_id; i < MAX_N_PERSONS; i++){
+    pthread_create(&passenger_thread_handles[current_passenger_id], NULL, passenger_thread, &passenger_ids[current_passenger_id]);
+    current_passenger_id++;
+  }
+  
+  for(i = 0; i < MAX_N_PERSONS; i++){
+    pthread_join(passenger_thread_handles[i],NULL);
+  }
+
+  write_to_file();
+  exit(0);
   pthread_join(lift_thread_handle,NULL);
   pthread_join(user_thread_handle,NULL);
   return 0;

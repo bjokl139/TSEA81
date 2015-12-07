@@ -183,7 +183,7 @@ static void person_process(int id)
 	  m.to_floor = destination_floor;
 	  
 	  message_send(&m, sizeof(struct lift_msg), QUEUE_LIFT, 0);
-	 
+	  
 	  /* Wait for LIFT_TRAVEL_DONE message*/
 	  message_receive(buf, 4096, QUEUE_FIRSTPERSON + id);
 	  
