@@ -3,8 +3,9 @@ DELAY_IN_USECS=1000
 
 
 
-system('make');
-system('taskset -c 0 ./lab');
+%system('make');
+%system('taskset -c 0 ./lab');
+system('./lab');
 load sample_times.txt
 load output.txt
 fid=fopen('data.raw','r');
