@@ -18,17 +18,13 @@
 
 #define NUMBER_MESSAGES 5
 
-#define ITERATIONS 10
+#define ITERATIONS 3 //*times no traves in each message
 // These variables keeps track of the process IDs of all processes
 // involved in the application so that they can be killed when the
 // exit command is received.
 static pid_t lift_pid;
-static pid_t uidraw_pid;
 static pid_t liftmove_pid;
-static pid_t result_pid;
 static pid_t person_pid[MAX_N_PERSONS];
-
-long long int travel_time_array[MAX_N_PERSONS][ITERATIONS];
 
 typedef enum {LIFT_TRAVEL, // A travel message is sent to the list process when a person would
 	                   // like to make a lift travel
@@ -47,24 +43,6 @@ struct lift_msg{
   int from_floor[NUMBER_MESSAGES];      // Specify source and destion for the LIFT_TRAVEL message.
   int to_floor[NUMBER_MESSAGES];
 };
-
-void write_to_file(){
-  int i,j;
-  FILE *f = fopen("one_cv.txt", "w");
-  if (f == NULL)
-    {
-      printf("Error opening file!\n");
-      exit(1);
-    }
-  for (i = 0; i <  MAX_N_PERSONS; i++){
-    for(j = 0; j <ITERATIONS; j++){
-      fprintf(f, "%d ", travel_time_array[i][j]);
-    }
-    fprintf(f, "\n");
-  }
-  fclose(f);
-}
-
 
 // Since we use processes now and not 
 static int get_random_value(int person_id, int maximum_value)
@@ -89,7 +67,7 @@ static void liftmove_process(void)
 		// TODO:
 		//    Sleep 2 seconds
                 //    Send a message to the lift process to move the lift.
-	  usleep(2000000);
+	  //usleep(200000);
 	  m.type = LIFT_MOVE;	
 	  message_send(&m, sizeof(struct lift_msg), QUEUE_LIFT, 0);
 	}
@@ -111,7 +89,7 @@ static void lift_process(void)
 		int i;
 		struct lift_msg reply;
 		struct lift_msg *m;
-		message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
+		//message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
 		int len = message_receive(msgbuf, 4096, QUEUE_LIFT); // Wait for a message
 		if(len < sizeof(struct lift_msg)){
 			fprintf(stderr, "Message too short\n");
@@ -131,13 +109,13 @@ static void lift_process(void)
 			
 			if(person_message_iterator[temp_id] < NUMBER_MESSAGES){
 			  enter_floor(Lift,temp_id,from_floors_all[temp_id][person_message_iterator[temp_id]],to_floors_all[temp_id][person_message_iterator[temp_id]]);
-			  message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
+			  //message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
 			  person_message_iterator[temp_id]++;
 			}else{
 			  
 			  reply.type = LIFT_TRAVEL_DONE;
 			  
-			message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
+			  //message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
 			message_send(&reply, sizeof(reply), QUEUE_FIRSTPERSON + temp_id, 0);
 			}
 		      }
@@ -151,7 +129,7 @@ static void lift_process(void)
 		      if ((temp_id != NO_ID) && n_passengers_in_lift(Lift) < MAX_N_PASSENGERS){
 			leave_floor(Lift, temp_id, Lift->floor); 
 			enter_lift(Lift, temp_id, temp_to_floor);
-			message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
+			//message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
 		      }
 		    }
 		  
@@ -166,7 +144,7 @@ static void lift_process(void)
 		  }
 		  person_message_iterator[m->person_id] = 1;
 		  enter_floor(Lift, m->person_id, m->from_floor[0], m->to_floor[0]);
-		  message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
+		  //message_send((char *) Lift, sizeof(*Lift), QUEUE_UI,0); // Draw the lift
 		  
 		  break;
 		}
@@ -178,6 +156,12 @@ static void person_process(int id)
 {
 	init_random();
 	
+	long long int travel_time_array[ITERATIONS];
+	
+	struct timeval starttime;
+	struct timeval stoptime;
+	long long int timediff;
+		
 	int start_floor;
 	int destination_floor;
 	 
@@ -185,12 +169,12 @@ static void person_process(int id)
 	struct lift_msg m;
 	struct lift_msg* reply;
 	int travel_count;
-	for(travel_count = 0; travel_count < ITERATIONS; travel_count += NUMBER_MESSAGES){
+	for(travel_count = 0; travel_count < ITERATIONS; travel_count++){
 	  /* Create a LIFT_TRAVEL message and send it */
 	  m.type = LIFT_TRAVEL;
 	  m.person_id = id;
 	  int i;
-	  for(i  = 0;i < NUMBER_MESSAGES; i++){
+	  for(i = 0; i < NUMBER_MESSAGES; i++){
 	    /* Generate ranom floors */
 	    start_floor = get_random_value(id, N_FLOORS-1);
 	    destination_floor = start_floor;
@@ -201,25 +185,61 @@ static void person_process(int id)
 	    m.from_floor[i] = start_floor;
 	    m.to_floor[i] = destination_floor;
 	  }
+
+	  gettimeofday(&starttime, NULL);//Start timing
 	  message_send((char *)&m, sizeof(struct lift_msg), QUEUE_LIFT, 0);
 	  
 	  /* Wait for LIFT_TRAVEL_DONE message*/
 	  message_receive(buf, 4096, QUEUE_FIRSTPERSON + id);
+	  gettimeofday(&stoptime, NULL);//Stop timing
 	  
+	  timediff = (stoptime.tv_sec*1000000ULL + stoptime.tv_usec) -
+	    (starttime.tv_sec*1000000ULL + starttime.tv_usec);
+	  travel_time_array[travel_count] = timediff;
+
 	  reply = (struct lift_msg *)buf;
-	  //if(reply->type != LIFT_TRAVEL_DONE)
-	  //lift_panic("Recieved unexpected message in person_process");
-	  /* Wait a little while */
-	  usleep(5000000);
-	  
+
 	}
+	m.type = PROCESS_DONE;
+	message_send((char *)&m, sizeof(struct lift_msg), QUEUE_RESULT,0);
+	
+	while(1){
+	  message_receive(buf, 4096, QUEUE_FIRSTPERSON + id);
+	  reply = (struct lift_msg *)buf;
+	  if(reply->type == WRITE_TO_FILE){
+	    int i;
+	    FILE *f = fopen("multi_travels.txt", "a");
+	    if (f == NULL)
+	      {
+		printf("Error opening file!\n");
+		exit(1);
+	      }
+	      for(i = 0; i < ITERATIONS; i++){
+		fprintf(f, "%d ", (int)travel_time_array[i]);
+	      }
+	      fprintf(f, "\n");
+	    
+	      fclose(f);
+
+	    break;
+	  }
+	}
+
+	
+	m.type = WRITE_DONE;
+	message_send((char *)&m, sizeof(struct lift_msg), QUEUE_RESULT,0);
+	exit(0);
 }
+
+	
+	
+	
 
 // This is the final process called by main()
 // It is responsible for:
 //   * Receiving and executing commands from the java GUI
 //   * Killing off all processes when exiting the application
-void uicommand_process(void)
+/*void uicommand_process(void)
 {
 	int i;
 	int current_person_id = 0;
@@ -238,13 +258,9 @@ void uicommand_process(void)
 		      current_person_id ++;
 		    }
 		  }
-			// TODO:
-			// * Check that we don't create too many persons
-			// * fork and create a new person process (and
-			// *  record the new pid in person_pid[])
 		}else if(!strcmp(message,"test")){
 		  int j;
-		  for(j = 0; j<MAX_N_PERSONS; j++){
+		  for(j = 0; j < MAX_N_PERSONS; j++){
 		   pid_t tmp_pid = fork();
 		    if (tmp_pid == 0){
 		      person_process(current_person_id);
@@ -255,10 +271,6 @@ void uicommand_process(void)
 		    }
 		  }
 		}else if(!strcmp(message, "exit")){
-		  // The code below sends the SIGINT signal to
-		  // all processes involved in this application
-		  // except for the uicommand process itself
-		  // (which is exited by calling exit())
 		  kill(uidraw_pid, SIGINT);
 		  kill(lift_pid, SIGINT);
 		  kill(liftmove_pid, SIGINT);
@@ -284,7 +296,7 @@ void uidraw_process(void)
 		lift_type Lift = (lift_type) &msg[0];
 		draw_lift(Lift);
 	}
-}
+}*/
 
 void result_process(void)
 {
@@ -298,8 +310,19 @@ void result_process(void)
       processes_done++;
     }
     if(processes_done == MAX_N_PERSONS){
+      //Clear file contents
+      printf("Clearing file\n");
+      FILE *f = fopen("multi_travels.txt", "w");
+      if (f == NULL)
+	{
+	  printf("Error opening file!\n");
+	  exit(1);
+	}
+      fclose(f);
+
       int i;
       for(i = 0; i < MAX_N_PERSONS; i++){
+	printf("Sending write command to process %d\n",i);
 	msg->type = WRITE_TO_FILE;
 	message_send((char *)msg, sizeof(struct lift_msg), QUEUE_FIRSTPERSON+i, 0);
 	message_receive(buf, 1024, QUEUE_RESULT);
@@ -307,32 +330,51 @@ void result_process(void)
       break;
     }
   }
+
+  //kill(uidraw_pid, SIGINT);
+  kill(lift_pid, SIGINT);
+  kill(liftmove_pid, SIGINT);
+  int i;
+  for(i=0; i < MAX_N_PERSONS; i++){
+    if(person_pid[i] > 0){
+      kill(person_pid[i], SIGINT);
+    }
+  } 
   
 }
 
 int main(int argc, char **argv)
 {
 	message_init();
-        si_ui_init(); // Initialize user interface. (Must be done
+        //si_ui_init(); // Initialize user interface. (Must be done
 		      // here!)
 
 	lift_pid = fork();
 	if(!lift_pid) {
 		lift_process();
 	}
-	uidraw_pid = fork();
+	/*uidraw_pid = fork();
 	if(!uidraw_pid){
 		uidraw_process();
-	}
+		}*/
 	liftmove_pid = fork();
 	if(!liftmove_pid){
 		liftmove_process();
 	}
-	result_pid = fork();
-	if(!result_pid){
-		result_process();
+	
+	int current_person_id = 0;
+	int j;
+	for(j = 0; j < MAX_N_PERSONS; j++){
+	  pid_t tmp_pid = fork();
+	  if (tmp_pid == 0){
+	    person_process(current_person_id);
+	  } else{
+	    person_pid[current_person_id] = tmp_pid;
+	    current_person_id ++;
+	  }
 	}
-	uicommand_process();
-
+	
+	result_process();
+	
 	return 0;
 }
