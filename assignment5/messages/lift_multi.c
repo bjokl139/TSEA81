@@ -3,9 +3,6 @@
 /* Simple_OS include */ 
 #include <pthread.h>
 
-/* drawing module */ 
-#include "draw.h"
-
 /* standard includes */ 
 #include <stdlib.h>
 #include <stdio.h>

@@ -3,9 +3,6 @@
 /* Simple_OS include */ 
 #include <pthread.h>
 
-/* drawing module */ 
-#include "draw.h"
-
 /* standard includes */ 
 #include <stdlib.h>
 #include <stdio.h>
@@ -140,11 +137,6 @@ int n_passengers_in_lift(lift_type lift)
     return n_passengers; 
 }
 
-/* MONITOR function lift_has_arrived: shall be called by the lift task
-   when the lift has arrived at the next floor. This function indicates
-   to other tasks that the lift has arrived, and then waits until the lift
-   shall move again. */
-
 int lift_should_stop(lift_type lift)
 {
   int should_stop = 0;
@@ -164,39 +156,10 @@ int lift_should_stop(lift_type lift)
   return should_stop;
 }
 
-void lift_has_arrived(lift_type lift)
-{
-  /* pthread_cond_broadcast(&lift->change);
-  while(lift_should_stop(lift)){
-    pthread_cond_wait(&lift->change, &lift->mutex);
-    }*/
-}
-
-
 /* --- functions related to lift task END --- */
 
 
 /* --- functions related to person task START --- */
-
-/* passenger_wait_for_lift: returns non-zero if the passenger shall
-   wait for the lift, otherwise returns zero */
-
-//static int passenger_wait_for_lift(lift_type lift, int wait_floor)
-//{
-//  int waiting_ready =
-    /* the lift is not moving */ 
-//   !lift->moving && 
-    /* and the lift is at wait_floor */ 
-//    lift->floor == wait_floor && 
-    /* and the lift is not full */ 
-//  n_passengers_in_lift(lift) < MAX_N_PASSENGERS; 
-  
-//return !waiting_ready;
-//}
-/*
-static int passenger_should_leave_lift(lift_type lift, int destination_floor){
-  return !lift->moving && lift->floor == destination_floor;
-  }*/
 
 /* enter_floor: makes a person with id id stand at floor floor */ 
 void enter_floor(lift_type lift, int id, int from_floor, int to_floor)
@@ -272,45 +235,5 @@ void enter_lift(lift_type lift, int id, int destination_floor)
   
   if(!sucess){lift_panic("Could not enter lift!");}
 }
-/*
-static void exit_lift(lift_type lift, int id){
-  int i;
-  int sucess = 0;
-  for(i=0; i < MAX_N_PASSENGERS; i++){
-    if(lift->passengers_in_lift[i].id == id){
-      lift->passengers_in_lift[i].id = NO_ID;
-      lift->passengers_in_lift[i].to_floor = NO_FLOOR;
-      sucess = 1;
-      break;
-    }
-  }
-  if(!sucess){lift_panic("Could not exit lift!");}
-  }*/
-
-/* MONITOR function lift_travel: performs a journey with the lift
-   starting at from_floor, and ending at to_floor */ 
-//void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
-//{
-  /*  pthread_mutex_lock(&lift->mutex);
-  enter_floor(lift, id, from_floor);
-  draw_lift(lift);
-
-  while(passenger_wait_for_lift(lift, from_floor)){
-    pthread_cond_wait(&lift->change, &lift->mutex);
-  }
-  leave_floor(lift, id, from_floor);
-  enter_lift(lift, id, to_floor);
-  draw_lift(lift);
-  pthread_cond_broadcast(&lift->change);
-  
-  while(!passenger_should_leave_lift(lift, to_floor)){
-     pthread_cond_wait(&lift->change, &lift->mutex);
-  }
-  exit_lift(lift, id);
-  draw_lift(lift);
-  pthread_cond_broadcast(&lift->change);
-
-  pthread_mutex_unlock(&lift->mutex);*/
-//}
 
 /* --- functions related to person task END --- */

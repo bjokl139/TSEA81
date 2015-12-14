@@ -3,15 +3,10 @@
 /* Simple_OS include */ 
 #include <pthread.h>
 
-/* drawing module */ 
-#include "draw.h"
-
 /* standard includes */ 
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
-
 
 /* panic function, to be called when fatal errors occur */ 
 static void lift_panic(const char message[])
@@ -129,8 +124,8 @@ void lift_move(lift_type lift, int next_floor, int change_direction)
         
     /* release lift */ 
     pthread_mutex_unlock(&lift->mutex); 
-        
-    /* it takes two seconds to move to the next floor */ 
+	
+	/* it takes two seconds to move to the next floor */ 
     //usleep(2000000);
         
     /* reserve lift */ 
@@ -147,9 +142,6 @@ void lift_move(lift_type lift, int next_floor, int change_direction)
     {
         lift->up = !lift->up; 
     }
-
-    /* draw, since a change has occurred */ 
-    //draw_lift(lift);
     
     /* release lift */ 
     pthread_mutex_unlock(&lift->mutex);
@@ -340,7 +332,6 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
 {
   pthread_mutex_lock(&lift->mutex);
   enter_floor(lift, id, from_floor);
-  //draw_lift(lift);
 
   while(passenger_wait_for_lift(lift, from_floor)){
     switch(from_floor){
@@ -364,7 +355,7 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
 
   leave_floor(lift, id, from_floor);
   enter_lift(lift, id, to_floor);
-  //draw_lift(lift);
+
   pthread_cond_broadcast(&lift->change);
   
   while(!passenger_should_leave_lift(lift, to_floor)){
@@ -387,7 +378,6 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
     }
   }
   exit_lift(lift, id);
-  //draw_lift(lift);
   pthread_cond_broadcast(&lift->change);
 
   switch(lift->floor){

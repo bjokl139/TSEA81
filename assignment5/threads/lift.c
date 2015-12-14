@@ -3,9 +3,6 @@
 /* Simple_OS include */ 
 #include <pthread.h>
 
-/* drawing module */ 
-#include "draw.h"
-
 /* standard includes */ 
 #include <stdlib.h>
 #include <stdio.h>
@@ -317,14 +314,14 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
 {
   pthread_mutex_lock(&lift->mutex);
   enter_floor(lift, id, from_floor);
-  //draw_lift(lift);
+
 
   while(passenger_wait_for_lift(lift, from_floor)){
     pthread_cond_wait(&lift->change, &lift->mutex);
   }
   leave_floor(lift, id, from_floor);
   enter_lift(lift, id, to_floor);
-  //draw_lift(lift);
+
   pthread_cond_broadcast(&lift->change);
   
   while(!passenger_should_leave_lift(lift, to_floor)){
@@ -332,7 +329,6 @@ void lift_travel(lift_type lift, int id, int from_floor, int to_floor)
   }
   exit_lift(lift, id);
 
-  //draw_lift(lift);
   pthread_cond_broadcast(&lift->change);
 
   pthread_mutex_unlock(&lift->mutex);

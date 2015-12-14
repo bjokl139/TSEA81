@@ -5,11 +5,10 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include "lift_cv_floor.h"
-#include "si_ui.h"
 #include <sys/time.h>
 #include <math.h>
 
-#define ITERATIONS 1000
+//#define ITERATIONS 10000 USE -D flag instead
 pthread_t passenger_thread_handles[MAX_N_PERSONS];
 int passenger_ids[MAX_N_PERSONS];
 long long int travel_time_array[MAX_N_PERSONS][ITERATIONS];
@@ -118,50 +117,14 @@ static void *passenger_thread(void *idptr)
 	  timediff = (stoptime.tv_sec*1000000ULL + stoptime.tv_usec) -
 	    (starttime.tv_sec*1000000ULL + starttime.tv_usec);
 	  travel_time_array[id][travel_counter] = timediff;
-	  
-	  // * Wait a little while
-	  //usleep(5000000);
-	  	
+
 	  }
 	  return NULL;
 }
 
-static void *user_thread(void *unused)
-{
-	int current_passenger_id = 0;
-	char message[SI_UI_MAX_MESSAGE_SIZE]; 
-
-	si_ui_set_size(670, 700); 
-	
-	while(1){
-		// Read a message from the GUI
-		si_ui_receive(message);
-		if(!strcmp(message, "new")){
-		  if(current_passenger_id < MAX_N_PERSONS){
-		    pthread_create(&passenger_thread_handles[current_passenger_id], NULL, passenger_thread, &passenger_ids[current_passenger_id]);
-		    current_passenger_id++;
-		  }else{
-		    si_ui_show_error("Person overflow! Building full!");
-		  }
-
-		}else if(!strcmp(message, "test")){
-		  int i;
-		  for (i = current_passenger_id; i < MAX_N_PERSONS; i++){
-		    pthread_create(&passenger_thread_handles[current_passenger_id], NULL, passenger_thread, &passenger_ids[current_passenger_id]);
-		    current_passenger_id++;
-		  }
-		}else if(!strcmp(message, "exit")){
-			lift_delete(Lift);
-			exit(0);
-		}
-	}
-	return NULL;
-}
-
-
 int main(int argc, char **argv)
 {
-  si_ui_init();
+  //si_ui_init();
   init_random();
   Lift = lift_create();
   
@@ -169,17 +132,11 @@ int main(int argc, char **argv)
   for(i = 0; i < MAX_N_PERSONS; i++){
     passenger_ids[i] = i;
   }
-  
-  /* set size of GUI window */ 
-  si_ui_set_size(670, 700); 
-  
-  //draw_lift(Lift);
-  
+
   pthread_t lift_thread_handle;
   pthread_t user_thread_handle;
   
   pthread_create(&lift_thread_handle,NULL,lift_thread,0);
-  pthread_create(&user_thread_handle,NULL,user_thread,0);
   
   int current_passenger_id = 0;
   for (i = current_passenger_id; i < MAX_N_PERSONS; i++){

@@ -6,17 +6,14 @@
 #include <signal.h>
 #include <unistd.h>
 #include "lift.h"
-#include "si_ui.h"
 #include "messages.h"
-
-#include "draw.h"
 
 #define QUEUE_UI 0
 #define QUEUE_LIFT 1
 #define QUEUE_RESULT 2
 #define QUEUE_FIRSTPERSON 10
 
-#define ITERATIONS 15
+//#define ITERATIONS 10000
 // These variables keeps track of the process IDs of all processes
 // involved in the application so that they can be killed when the
 // exit command is received.
@@ -234,75 +231,6 @@ static void person_process(int id)
 	exit(0);
 }
 
-// This is the final process called by main()
-// It is responsible for:
-//   * Receiving and executing commands from the java GUI
-//   * Killing off all processes when exiting the application
-/*void uicommand_process(void)
-{
-	int i;
-	int current_person_id = 0;
-	char message[SI_UI_MAX_MESSAGE_SIZE]; 
-	while(1){
-		// Read a message from the GUI
-		si_ui_receive(message);
-		if(!strcmp(message, "new")){
-		  if(current_person_id < MAX_N_PERSONS){
-		    
-		    pid_t tmp_pid = fork();
-		    if (tmp_pid == 0){
-		      person_process(current_person_id);
-		    } else{
-		      person_pid[current_person_id] = tmp_pid;
-		      current_person_id ++;
-		    }
-		  }
-			// TODO:
-			// * Check that we don't create too many persons
-			// * fork and create a new person process (and
-			// *  record the new pid in person_pid[])
-		}else if(!strcmp(message,"test")){
-		  int j;
-		  for(j = 0; j<MAX_N_PERSONS; j++){
-		   pid_t tmp_pid = fork();
-		    if (tmp_pid == 0){
-		      person_process(current_person_id);
-		    } else{
-		      person_pid[current_person_id] = tmp_pid;
-		      current_person_id ++;
-		    }
-		  }
-		}else if(!strcmp(message, "exit")){
-		  // The code below sends the SIGINT signal to
-		  // all processes involved in this application
-		  // except for the uicommand process itself
-		  // (which is exited by calling exit())
-		  kill(uidraw_pid, SIGINT);
-		  kill(lift_pid, SIGINT);
-			kill(liftmove_pid, SIGINT);
-			for(i=0; i < MAX_N_PERSONS; i++){
-			  if(person_pid[i] > 0){
-			    kill(person_pid[i], SIGINT);
-			  }
-			}
-			exit(0);
-		}
-	}
-}
-
-// This process is responsible for drawing the lift. Receives lift_type structures
-// as messages.
-void uidraw_process(void)
-{
-	char msg[1024];
-	si_ui_set_size(670, 700); 
-	while(1){
-	  message_receive(msg, 1024, QUEUE_UI);
-	  lift_type Lift = (lift_type) &msg[0];
-	  draw_lift(Lift);
-	}
-}
-*/
 void result_process(void)
 {
   int processes_done = 0;
@@ -350,17 +278,11 @@ void result_process(void)
 int main(int argc, char **argv)
 {
 	message_init();
-        //si_ui_init(); // Initialize user interface. (Must be done
-		      // here!)
 
 	lift_pid = fork();
 	if(!lift_pid) {
 		lift_process();
 	}
-	/*	uidraw_pid = fork();
-	if(!uidraw_pid){
-		uidraw_process();
-		}*/
 	liftmove_pid = fork();
 	if(!liftmove_pid){
 		liftmove_process();
