@@ -208,14 +208,14 @@ figure(5)
 plot(passengers,[max_one_cv; max_many_cv])
 title('Maximal restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Maximal restid')
+ylabel('Maximal restid [\mus]')
 legend('En CV', 'En CV per våning')
 
 figure(6)
 plot(passengers,[max_single_travels; max_multi_travels_10; max_multi_travels_50; max_multi_travels_100])
 title('Maximal restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Maximal restid')
+ylabel('Maximal restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 
@@ -250,12 +250,143 @@ figure(7)
 plot(passengers,[min_one_cv; min_many_cv])
 title('Minsta restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Minsta restid')
+ylabel('Minsta restid [\mus]')
 legend('En CV', 'En CV per våning')
 
 figure(8)
 plot(passengers,[min_single_travels; min_multi_travels_10; min_multi_travels_50; min_multi_travels_100])
 title('Minsta restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Minsta restid')
+ylabel('Minsta restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
+
+%%
+individual_mean_one_cv_5 = mean(one_cv_5');
+individual_mean_one_cv_10 = mean(one_cv_10');
+individual_mean_one_cv_20 = mean(one_cv_20');
+individual_mean_one_cv_30 = mean(one_cv_30');
+individual_mean_one_cv_40 = mean(one_cv_40');
+individual_mean_one_cv_50 = mean(one_cv_50');
+individual_mean_one_cv_60 = mean(one_cv_60');
+
+individual_mean_many_cv_5 = mean(many_cv_5');
+individual_mean_many_cv_10 = mean(many_cv_10');
+individual_mean_many_cv_20 = mean(many_cv_20');
+individual_mean_many_cv_30 = mean(many_cv_30');
+individual_mean_many_cv_40 = mean(many_cv_40');
+individual_mean_many_cv_50 = mean(many_cv_50');
+individual_mean_many_cv_60 = mean(many_cv_60');
+
+individual_mean_single_travels_5 = mean(single_travels_5');
+individual_mean_single_travels_10 = mean(single_travels_10');
+individual_mean_single_travels_20 = mean(single_travels_20');
+individual_mean_single_travels_30 = mean(single_travels_30');
+individual_mean_single_travels_40 = mean(single_travels_40');
+individual_mean_single_travels_50 = mean(single_travels_50');
+individual_mean_single_travels_60 = mean(single_travels_60');
+
+individual_mean_multi_travels_5_10 = mean(multi_travels_5_10')/10;
+individual_mean_multi_travels_10_10 = mean(multi_travels_10_10')/10;
+individual_mean_multi_travels_20_10 = mean(multi_travels_20_10')/10;
+individual_mean_multi_travels_30_10 = mean(multi_travels_30_10')/10;
+individual_mean_multi_travels_40_10 = mean(multi_travels_40_10')/10;
+individual_mean_multi_travels_50_10 = mean(multi_travels_50_10')/10;
+individual_mean_multi_travels_60_10 = mean(multi_travels_60_10')/10;
+
+
+individual_mean_multi_travels_5_50 = mean(multi_travels_5_50'/0/50);
+individual_mean_multi_travels_10_50 = mean(multi_travels_10_50')/50;
+individual_mean_multi_travels_20_50 = mean(multi_travels_20_50')/50;
+individual_mean_multi_travels_30_50 = mean(multi_travels_30_50')/50;
+individual_mean_multi_travels_40_50 = mean(multi_travels_40_50')/50;
+individual_mean_multi_travels_50_50 = mean(multi_travels_50_50')/50;
+individual_mean_multi_travels_60_50 = mean(multi_travels_60_50')/50;
+
+
+individual_mean_multi_travels_5_100 = mean(multi_travels_5_10')/100;
+individual_mean_multi_travels_10_100 = mean(multi_travels_10_100')/100;
+individual_mean_multi_travels_20_100 = mean(multi_travels_20_100')/100;
+individual_mean_multi_travels_30_100 = mean(multi_travels_30_100')/100;
+individual_mean_multi_travels_40_100 = mean(multi_travels_40_100')/100;
+individual_mean_multi_travels_50_100 = mean(multi_travels_50_100')/100;
+individual_mean_multi_travels_60_100 = mean(multi_travels_60_100')/100;
+
+
+figure(9)
+title('En CV')
+hold on
+plot(individual_mean_one_cv_5);
+plot(individual_mean_one_cv_10);
+plot(individual_mean_one_cv_20);
+plot(individual_mean_one_cv_30);
+plot(individual_mean_one_cv_40);
+plot(individual_mean_one_cv_50);
+plot(individual_mean_one_cv_60);
+axis([0 60 0 2e4])
+hold off
+
+figure(10)
+title('Flera CV')
+hold on
+plot(individual_mean_many_cv_5);
+plot(individual_mean_many_cv_10);
+plot(individual_mean_many_cv_20);
+plot(individual_mean_many_cv_30);
+plot(individual_mean_many_cv_40);
+plot(individual_mean_many_cv_50);
+plot(individual_mean_many_cv_60);
+axis([0 60 0 6e3])
+hold off
+
+figure(11)
+title('1 meddelande per resa')
+hold on
+plot(individual_mean_single_travels_5)
+plot(individual_mean_single_travels_20)
+plot(individual_mean_single_travels_30)
+plot(individual_mean_single_travels_40)
+plot(individual_mean_single_travels_50)
+plot(individual_mean_single_travels_60)
+plot(individual_mean_single_travels_60)
+axis([0 60 0 180])
+hold off
+
+figure(12)
+title('10 meddelande per resa')
+hold on
+plot(individual_mean_multi_travels_5_10)
+plot(individual_mean_multi_travels_10_10)
+plot(individual_mean_multi_travels_20_10)
+plot(individual_mean_multi_travels_30_10)
+plot(individual_mean_multi_travels_40_10)
+plot(individual_mean_multi_travels_50_10)
+plot(individual_mean_multi_travels_60_10)
+axis([0 60 0 40])
+hold off
+
+figure(13)
+title('50 meddelande per resa')
+hold on
+plot(individual_mean_multi_travels_5_50)
+plot(individual_mean_multi_travels_10_50)
+plot(individual_mean_multi_travels_20_50)
+plot(individual_mean_multi_travels_30_50)
+plot(individual_mean_multi_travels_40_50)
+plot(individual_mean_multi_travels_50_50)
+plot(individual_mean_multi_travels_60_50)
+axis([0 60 0 30])
+hold off
+
+figure(14)
+title('100 meddelande per resa')
+hold on
+plot(individual_mean_multi_travels_5_100)
+plot(individual_mean_multi_travels_10_100)
+plot(individual_mean_multi_travels_20_100)
+plot(individual_mean_multi_travels_30_100)
+plot(individual_mean_multi_travels_40_100)
+plot(individual_mean_multi_travels_50_100)
+plot(individual_mean_multi_travels_60_100)
+axis([0 60 0 30])
+hold off
+
