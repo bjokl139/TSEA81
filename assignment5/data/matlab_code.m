@@ -1,3 +1,47 @@
+%% Gather data
+passengers = [5 10 20 30 40 50 60];
+
+for it = passengers
+    display(sprintf('one_cv with %d passengers', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C threads one_cv_auto',it));
+    system('./threads/lift_pthreads_one_cv');
+    system(sprintf('cp one_cv.txt data/one_cv_%d.txt',it));
+end
+
+for it = passengers
+    display(sprintf('many_cv with %d passengers', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C threads many_cv_auto',it));
+    system('./threads/lift_pthreads_many_cv');
+    system(sprintf('cp many_cv.txt data/many_cv_%d.txt',it));
+end
+
+for it = passengers
+    display(sprintf('single with %d passengers', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C messages single_auto',it));
+    system('./messages/lift_messages_single');
+    system(sprintf('cp single_travels.txt data/single_travels_%d.txt',it));
+end
+
+for it = passengers
+    display(sprintf('multiple with %d passengers, 10 travels per message', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=1000 NUMBER_MESSAGES=10 -C messages multi_auto',it));
+    system('./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_10.txt',it));
+end
+
+for it = passengers
+    display(sprintf('multiple with %d passengers, 50 travels per message', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=200 NUMBER_MESSAGES=50 -C messages multi_auto',it));
+    system('./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_50.txt',it));
+end
+
+for it = passengers
+    display(sprintf('multiple with %d passengers, 100 travels per message', it))
+    system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=100 NUMBER_MESSAGES=100 -C messages multi_auto',it));
+    system('./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_100.txt',it));
+end
 %% Load data
 close all; clear all; clc;
 
