@@ -1,4 +1,5 @@
 %% Gather data
+%Must be run on a Linux machine with
 passengers = [5 10 20 30 40 50 60];
 
 for it = passengers
@@ -125,16 +126,16 @@ mean_multi_travels_100 = [mean(mean(multi_travels_5_100)), mean(mean(multi_trave
 
 figure(1)
 plot(passengers,[mean_one_cv; mean_many_cv])
-title('Restid med trådar (4 kärnor)')
+title('Genomsnittlig restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Genomsnittlig restid [\mus]')
+ylabel('Restid [\mus]')
 legend('En CV', 'En CV per våning')
 
 figure(2)
 plot(passengers,[mean_single_travels; mean_multi_travels_10; mean_multi_travels_50; mean_multi_travels_100])
-title('Restid med processer (4 kärnor)')
+title('Genomsnittlig restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Genomsnittlig restid [\mus]')
+ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 %% Standard deviations
@@ -177,7 +178,7 @@ xlabel('Antal passagerare')
 ylabel('Genomsnittlig standardavvikelse')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
-
+%% Max travel time
 max_one_cv = [max(max(one_cv_5)), max(max(one_cv_10)), max(max(one_cv_20)), ... 
     max(max(one_cv_30)), max(max(one_cv_40)), ... 
     max(max(one_cv_50)), max(max(one_cv_60))];
@@ -208,185 +209,56 @@ figure(5)
 plot(passengers,[max_one_cv; max_many_cv])
 title('Maximal restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Maximal restid [\mus]')
+ylabel('Restid [\mus]')
 legend('En CV', 'En CV per våning')
 
 figure(6)
 plot(passengers,[max_single_travels; max_multi_travels_10; max_multi_travels_50; max_multi_travels_100])
 title('Maximal restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
-ylabel('Maximal restid [\mus]')
+ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
-
-
-min_one_cv = [min(min(one_cv_5)), min(min(one_cv_10)), min(min(one_cv_20)), ... 
-    min(min(one_cv_30)), min(min(one_cv_40)), ... 
-    min(min(one_cv_50)), min(min(one_cv_60))];
-
-min_many_cv = [min(min(many_cv_5)), min(min(many_cv_10)), min(min(many_cv_20)), ... 
-    min(min(many_cv_30)), min(min(many_cv_40)), ... 
-    min(min(many_cv_50)), min(min(many_cv_60))];
-
-min_single_travels = [min(min(single_travels_5)), min(min(single_travels_10)), min(min(single_travels_20)), ... 
-    min(min(single_travels_30)), min(min(single_travels_40)), ... 
-    min(min(single_travels_50)), min(min(single_travels_60))];
-
-min_multi_travels_10 = [min(min(multi_travels_5_10)), min(min(multi_travels_10_10)), min(min(multi_travels_20_10)), ... 
-    min(min(multi_travels_30_10)), min(min(multi_travels_40_10)), ... 
-    min(min(multi_travels_50_10)), min(min(multi_travels_60_10))];
-
-min_multi_travels_50 = [min(min(multi_travels_5_50)), min(min(multi_travels_10_50)), min(min(multi_travels_20_50)), ... 
-    min(min(multi_travels_30_50)), min(min(multi_travels_40_50)), ... 
-    min(min(multi_travels_50_50)), min(min(multi_travels_60_50))];
-
-min_multi_travels_100 = [min(min(multi_travels_5_100)), min(min(multi_travels_10_100)), min(min(multi_travels_20_100)), ... 
-    min(min(multi_travels_30_100)), min(min(multi_travels_40_100)), ... 
-    min(min(multi_travels_50_100)), min(min(multi_travels_60_100))];
-
-
-
+%% Mean travel time for each person
 figure(7)
-plot(passengers,[min_one_cv; min_many_cv])
-title('Minsta restid med trådar (4 kärnor)')
-xlabel('Antal passagerare')
-ylabel('Minsta restid [\mus]')
-legend('En CV', 'En CV per våning')
+title('Medelrestid för var person, trådar (4 kärnor)')
+hold on
+plot(mean(one_cv_5'));
+plot(mean(one_cv_10'));
+plot(mean(one_cv_20'));
+plot(mean(one_cv_30'));
+plot(mean(one_cv_40'));
+plot(mean(one_cv_50'));
+plot(mean(one_cv_60'));
+ax = gca;
+ax.ColorOrderIndex = 1;
+plot(mean(many_cv_5'),'--');
+plot(mean(many_cv_10'),'--');
+plot(mean(many_cv_20'),'--');
+plot(mean(many_cv_30'),'--');
+plot(mean(many_cv_40'),'--');
+plot(mean(many_cv_50'),'--');
+plot(mean(many_cv_60'),'--');
+ax.YScale = 'log';
+xlabel('Person')
+ylabel('Restid [\mus]')
+axis([0 60 100 30000]);
+
+hold off
 
 figure(8)
-plot(passengers,[min_single_travels; min_multi_travels_10; min_multi_travels_50; min_multi_travels_100])
-title('Minsta restid med processer (4 kärnor)')
-xlabel('Antal passagerare')
-ylabel('Minsta restid [\mus]')
-legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
-
-%%
-individual_mean_one_cv_5 = mean(one_cv_5');
-individual_mean_one_cv_10 = mean(one_cv_10');
-individual_mean_one_cv_20 = mean(one_cv_20');
-individual_mean_one_cv_30 = mean(one_cv_30');
-individual_mean_one_cv_40 = mean(one_cv_40');
-individual_mean_one_cv_50 = mean(one_cv_50');
-individual_mean_one_cv_60 = mean(one_cv_60');
-
-individual_mean_many_cv_5 = mean(many_cv_5');
-individual_mean_many_cv_10 = mean(many_cv_10');
-individual_mean_many_cv_20 = mean(many_cv_20');
-individual_mean_many_cv_30 = mean(many_cv_30');
-individual_mean_many_cv_40 = mean(many_cv_40');
-individual_mean_many_cv_50 = mean(many_cv_50');
-individual_mean_many_cv_60 = mean(many_cv_60');
-
-individual_mean_single_travels_5 = mean(single_travels_5');
-individual_mean_single_travels_10 = mean(single_travels_10');
-individual_mean_single_travels_20 = mean(single_travels_20');
-individual_mean_single_travels_30 = mean(single_travels_30');
-individual_mean_single_travels_40 = mean(single_travels_40');
-individual_mean_single_travels_50 = mean(single_travels_50');
-individual_mean_single_travels_60 = mean(single_travels_60');
-
-individual_mean_multi_travels_5_10 = mean(multi_travels_5_10')/10;
-individual_mean_multi_travels_10_10 = mean(multi_travels_10_10')/10;
-individual_mean_multi_travels_20_10 = mean(multi_travels_20_10')/10;
-individual_mean_multi_travels_30_10 = mean(multi_travels_30_10')/10;
-individual_mean_multi_travels_40_10 = mean(multi_travels_40_10')/10;
-individual_mean_multi_travels_50_10 = mean(multi_travels_50_10')/10;
-individual_mean_multi_travels_60_10 = mean(multi_travels_60_10')/10;
-
-
-individual_mean_multi_travels_5_50 = mean(multi_travels_5_50'/0/50);
-individual_mean_multi_travels_10_50 = mean(multi_travels_10_50')/50;
-individual_mean_multi_travels_20_50 = mean(multi_travels_20_50')/50;
-individual_mean_multi_travels_30_50 = mean(multi_travels_30_50')/50;
-individual_mean_multi_travels_40_50 = mean(multi_travels_40_50')/50;
-individual_mean_multi_travels_50_50 = mean(multi_travels_50_50')/50;
-individual_mean_multi_travels_60_50 = mean(multi_travels_60_50')/50;
-
-
-individual_mean_multi_travels_5_100 = mean(multi_travels_5_10')/100;
-individual_mean_multi_travels_10_100 = mean(multi_travels_10_100')/100;
-individual_mean_multi_travels_20_100 = mean(multi_travels_20_100')/100;
-individual_mean_multi_travels_30_100 = mean(multi_travels_30_100')/100;
-individual_mean_multi_travels_40_100 = mean(multi_travels_40_100')/100;
-individual_mean_multi_travels_50_100 = mean(multi_travels_50_100')/100;
-individual_mean_multi_travels_60_100 = mean(multi_travels_60_100')/100;
-
-
-figure(9)
-title('En CV')
+clf;
+title('Medelrestid för var person, processer (4 kärnor)')
 hold on
-plot(individual_mean_one_cv_5);
-plot(individual_mean_one_cv_10);
-plot(individual_mean_one_cv_20);
-plot(individual_mean_one_cv_30);
-plot(individual_mean_one_cv_40);
-plot(individual_mean_one_cv_50);
-plot(individual_mean_one_cv_60);
-axis([0 60 0 2e4])
-hold off
-
-figure(10)
-title('Flera CV')
-hold on
-plot(individual_mean_many_cv_5);
-plot(individual_mean_many_cv_10);
-plot(individual_mean_many_cv_20);
-plot(individual_mean_many_cv_30);
-plot(individual_mean_many_cv_40);
-plot(individual_mean_many_cv_50);
-plot(individual_mean_many_cv_60);
-axis([0 60 0 6e3])
-hold off
-
-figure(11)
-title('1 meddelande per resa')
-hold on
-plot(individual_mean_single_travels_5)
-plot(individual_mean_single_travels_20)
-plot(individual_mean_single_travels_30)
-plot(individual_mean_single_travels_40)
-plot(individual_mean_single_travels_50)
-plot(individual_mean_single_travels_60)
-plot(individual_mean_single_travels_60)
-axis([0 60 0 180])
-hold off
-
-figure(12)
-title('10 meddelande per resa')
-hold on
-plot(individual_mean_multi_travels_5_10)
-plot(individual_mean_multi_travels_10_10)
-plot(individual_mean_multi_travels_20_10)
-plot(individual_mean_multi_travels_30_10)
-plot(individual_mean_multi_travels_40_10)
-plot(individual_mean_multi_travels_50_10)
-plot(individual_mean_multi_travels_60_10)
-axis([0 60 0 40])
-hold off
-
-figure(13)
-title('50 meddelande per resa')
-hold on
-plot(individual_mean_multi_travels_5_50)
-plot(individual_mean_multi_travels_10_50)
-plot(individual_mean_multi_travels_20_50)
-plot(individual_mean_multi_travels_30_50)
-plot(individual_mean_multi_travels_40_50)
-plot(individual_mean_multi_travels_50_50)
-plot(individual_mean_multi_travels_60_50)
-axis([0 60 0 30])
-hold off
-
-figure(14)
-title('100 meddelande per resa')
-hold on
-plot(individual_mean_multi_travels_5_100)
-plot(individual_mean_multi_travels_10_100)
-plot(individual_mean_multi_travels_20_100)
-plot(individual_mean_multi_travels_30_100)
-plot(individual_mean_multi_travels_40_100)
-plot(individual_mean_multi_travels_50_100)
-plot(individual_mean_multi_travels_60_100)
-axis([0 60 0 30])
+plot(mean(single_travels_60'))
+plot(mean(multi_travels_60_10')/10)
+plot(mean(multi_travels_60_50')/50)
+plot(mean(multi_travels_60_100')/100)
+legend('1 resa per meddlenade','10 resor per meddlenade','50 resor per meddlenade','100 resor per meddlenade')
+ax = gca;
+ax.YScale = 'log';
+xlabel('Person')
+ylabel('Restid [\mus]')
+axis([0 60 10 1000]);
 hold off
 
