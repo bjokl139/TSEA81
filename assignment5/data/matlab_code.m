@@ -125,17 +125,17 @@ mean_multi_travels_100 = [mean(mean(multi_travels_5_100)), mean(mean(multi_trave
 
 figure(1)
 plot(passengers,[mean_one_cv; mean_many_cv])
-title('Travel time using threads (4 cores)')
-xlabel('No. passengers')
-ylabel('Mean time [\mus]')
-legend('One CV', 'One CV per floor')
+title('Restid med trådar (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Genomsnittlig restid [\mus]')
+legend('En CV', 'En CV per våning')
 
 figure(2)
 plot(passengers,[mean_single_travels; mean_multi_travels_10; mean_multi_travels_50; mean_multi_travels_100])
-title('Travel time using message passing (4 cores)')
-xlabel('No. passengers')
-ylabel('Mean time [\mus]')
-legend('1 travel per message','10 travels per message','50 travels per message','100 travels per message');
+title('Restid med processer (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Genomsnittlig restid [\mus]')
+legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 %% Standard deviations
 
@@ -165,17 +165,17 @@ std_multi_travels_100 = [mean(std(multi_travels_5_100'/100)), mean(std(multi_tra
 
 figure(3)
 plot(passengers, [std_one_cv; std_many_cv])
-title('Travel time standard deviation using threads (4 cores)')
-xlabel('No. passengers')
-ylabel('Standard deviation')
-legend('One CV', 'One CV per floor')
+title('Restidens standardavvikelse med trådar (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Genomsnittlig standardavvikelse')
+legend('En CV', 'En CV per våning')
 
 figure(4)
 plot(passengers,[std_single_travels; std_multi_travels_10; std_multi_travels_50; std_multi_travels_100])
-title('Travel time standard deviation using message passing (4 cores)')
-xlabel('No. passengers')
-ylabel('Standard deviation')
-legend('1 travel per message','10 travels per message','50 travels per message','100 travels per message');
+title('Restidens standardavvikelse med processer (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Genomsnittlig standardavvikelse')
+legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 
 max_one_cv = [max(max(one_cv_5)), max(max(one_cv_10)), max(max(one_cv_20)), ... 
@@ -206,14 +206,56 @@ max_multi_travels_100 = [max(max(multi_travels_5_100)), max(max(multi_travels_10
 
 figure(5)
 plot(passengers,[max_one_cv; max_many_cv])
-title('Max travel time using threads (4 cores)')
-xlabel('No. passengers')
-ylabel('Max travel time')
-legend('One CV', 'One CV per floor')
+title('Maximal restid med trådar (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Maximal restid')
+legend('En CV', 'En CV per våning')
 
 figure(6)
 plot(passengers,[max_single_travels; max_multi_travels_10; max_multi_travels_50; max_multi_travels_100])
-title('Max travel time using message passing (4 cores)')
-xlabel('No. passengers')
-ylabel('Max travel time')
-legend('1 travel per message','10 travels per message','50 travels per message','100 travels per message');
+title('Maximal restid med processer (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Maximal restid')
+legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
+
+
+
+min_one_cv = [min(min(one_cv_5)), min(min(one_cv_10)), min(min(one_cv_20)), ... 
+    min(min(one_cv_30)), min(min(one_cv_40)), ... 
+    min(min(one_cv_50)), min(min(one_cv_60))];
+
+min_many_cv = [min(min(many_cv_5)), min(min(many_cv_10)), min(min(many_cv_20)), ... 
+    min(min(many_cv_30)), min(min(many_cv_40)), ... 
+    min(min(many_cv_50)), min(min(many_cv_60))];
+
+min_single_travels = [min(min(single_travels_5)), min(min(single_travels_10)), min(min(single_travels_20)), ... 
+    min(min(single_travels_30)), min(min(single_travels_40)), ... 
+    min(min(single_travels_50)), min(min(single_travels_60))];
+
+min_multi_travels_10 = [min(min(multi_travels_5_10)), min(min(multi_travels_10_10)), min(min(multi_travels_20_10)), ... 
+    min(min(multi_travels_30_10)), min(min(multi_travels_40_10)), ... 
+    min(min(multi_travels_50_10)), min(min(multi_travels_60_10))];
+
+min_multi_travels_50 = [min(min(multi_travels_5_50)), min(min(multi_travels_10_50)), min(min(multi_travels_20_50)), ... 
+    min(min(multi_travels_30_50)), min(min(multi_travels_40_50)), ... 
+    min(min(multi_travels_50_50)), min(min(multi_travels_60_50))];
+
+min_multi_travels_100 = [min(min(multi_travels_5_100)), min(min(multi_travels_10_100)), min(min(multi_travels_20_100)), ... 
+    min(min(multi_travels_30_100)), min(min(multi_travels_40_100)), ... 
+    min(min(multi_travels_50_100)), min(min(multi_travels_60_100))];
+
+
+
+figure(7)
+plot(passengers,[min_one_cv; min_many_cv])
+title('Minsta restid med trådar (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Minsta restid')
+legend('En CV', 'En CV per våning')
+
+figure(8)
+plot(passengers,[min_single_travels; min_multi_travels_10; min_multi_travels_50; min_multi_travels_100])
+title('Minsta restid med processer (4 kärnor)')
+xlabel('Antal passagerare')
+ylabel('Minsta restid')
+legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
