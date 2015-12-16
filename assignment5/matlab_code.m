@@ -5,43 +5,68 @@ passengers = [5 10 20 30 40 50 60];
 for it = passengers
     display(sprintf('one_cv with %d passengers', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C threads one_cv_auto',it));
+    
     system('./threads/lift_pthreads_one_cv');
     system(sprintf('cp one_cv.txt data/one_cv_%d.txt',it));
+    
+    system('taskset -c 0 ./threads/lift_pthreads_one_cv');
+    system(sprintf('cp one_cv.txt data/one_cv_%d_onecpu.txt',it));
 end
 
 for it = passengers
     display(sprintf('many_cv with %d passengers', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C threads many_cv_auto',it));
+    
     system('./threads/lift_pthreads_many_cv');
     system(sprintf('cp many_cv.txt data/many_cv_%d.txt',it));
+    
+    system('taskset -c 0 ./threads/lift_pthreads_many_cv');
+    system(sprintf('cp many_cv.txt data/many_cv_%d_onecpu.txt',it));
 end
 
 for it = passengers
     display(sprintf('single with %d passengers', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=10000 -C messages single_auto',it));
+    
     system('./messages/lift_messages_single');
     system(sprintf('cp single_travels.txt data/single_travels_%d.txt',it));
+
+    system('taskset -c 0 ./messages/lift_messages_single');
+    system(sprintf('cp single_travels.txt data/single_travels_%d_onecpu.txt',it));
 end
 
 for it = passengers
     display(sprintf('multiple with %d passengers, 10 travels per message', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=1000 NUMBER_MESSAGES=10 -C messages multi_auto',it));
+    
     system('./messages/lift_messages_multi');
     system(sprintf('cp multi_travels.txt data/multi_travels_%d_10.txt',it));
+
+    system('taskset -c 0 ./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_10_onecpu.txt',it));
+
 end
 
 for it = passengers
     display(sprintf('multiple with %d passengers, 50 travels per message', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=200 NUMBER_MESSAGES=50 -C messages multi_auto',it));
+    
     system('./messages/lift_messages_multi');
     system(sprintf('cp multi_travels.txt data/multi_travels_%d_50.txt',it));
+    
+    system('taskset -c 0 ./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_50_onecpu.txt',it));
 end
 
 for it = passengers
     display(sprintf('multiple with %d passengers, 100 travels per message', it))
     system(sprintf('make MAX_N_PERSONS=%d ITERATIONS=100 NUMBER_MESSAGES=100 -C messages multi_auto',it));
+    
     system('./messages/lift_messages_multi');
     system(sprintf('cp multi_travels.txt data/multi_travels_%d_100.txt',it));
+    
+    system('taskset -c 0 ./messages/lift_messages_multi');
+    system(sprintf('cp multi_travels.txt data/multi_travels_%d_100_onecpu.txt',it));
 end
 %% Load data
 close all; clear all; clc;
@@ -86,16 +111,15 @@ load multi_travels_40_50.txt
 load multi_travels_50_50.txt
 load multi_travels_60_50.txt
 
-load multi_travels_5_100.txt
-load multi_travels_10_100.txt
-load multi_travels_20_100.txt
-load multi_travels_30_100.txt
-load multi_travels_40_100.txt
-load multi_travels_50_100.txt
-load multi_travels_60_100.txt
+load multi_travels_5_100_onecpu.txt
+load multi_travels_10_100_onecpu.txt
+load multi_travels_20_100_onecpu.txt
+load multi_travels_30_100_onecpu.txt
+load multi_travels_40_100_onecpu.txt
+load multi_travels_50_100_onecpu.txt
+load multi_travels_60_100_onecpu.txt
 
 passengers = [5 10 20 30 40 50 60];
-
 %% Mean travel times
 mean_one_cv = [mean(mean(one_cv_5)), mean(mean(one_cv_10)), mean(mean(one_cv_20)),...
     mean(mean(one_cv_30)), mean(mean(one_cv_40)),...
@@ -126,14 +150,14 @@ mean_multi_travels_100 = [mean(mean(multi_travels_5_100)), mean(mean(multi_trave
 
 figure(1)
 plot(passengers,[mean_one_cv; mean_many_cv])
-title('Genomsnittlig restid med trådar (4 kärnor)')
+title('Genomsnittlig restid med trï¿½dar (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
-legend('En CV', 'En CV per våning')
+legend('En CV', 'En CV per vï¿½ning')
 
 figure(2)
 plot(passengers,[mean_single_travels; mean_multi_travels_10; mean_multi_travels_50; mean_multi_travels_100])
-title('Genomsnittlig restid med processer (4 kärnor)')
+title('Genomsnittlig restid med processer (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
@@ -166,14 +190,14 @@ std_multi_travels_100 = [mean(std(multi_travels_5_100'/100)), mean(std(multi_tra
 
 figure(3)
 plot(passengers, [std_one_cv; std_many_cv])
-title('Restidens standardavvikelse med trådar (4 kärnor)')
+title('Restidens standardavvikelse med trï¿½dar (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Genomsnittlig standardavvikelse')
-legend('En CV', 'En CV per våning')
+legend('En CV', 'En CV per vï¿½ning')
 
 figure(4)
 plot(passengers,[std_single_travels; std_multi_travels_10; std_multi_travels_50; std_multi_travels_100])
-title('Restidens standardavvikelse med processer (4 kärnor)')
+title('Restidens standardavvikelse med processer (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Genomsnittlig standardavvikelse')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
@@ -207,21 +231,21 @@ max_multi_travels_100 = [max(max(multi_travels_5_100)), max(max(multi_travels_10
 
 figure(5)
 plot(passengers,[max_one_cv; max_many_cv])
-title('Maximal restid med trådar (4 kärnor)')
+title('Maximal restid med trï¿½dar (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
-legend('En CV', 'En CV per våning')
+legend('En CV', 'En CV per vï¿½ning')
 
 figure(6)
 plot(passengers,[max_single_travels; max_multi_travels_10; max_multi_travels_50; max_multi_travels_100])
-title('Maximal restid med processer (4 kärnor)')
+title('Maximal restid med processer (4 kï¿½rnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 %% Mean travel time for each person
 figure(7)
-title('Medelrestid för var person, trådar (4 kärnor)')
+title('Medelrestid fï¿½r var person, trï¿½dar (4 kï¿½rnor)')
 hold on
 plot(mean(one_cv_5'));
 plot(mean(one_cv_10'));
@@ -248,7 +272,7 @@ hold off
 
 figure(8)
 clf;
-title('Medelrestid för var person, processer (4 kärnor)')
+title('Medelrestid fï¿½r var person, processer (4 kï¿½rnor)')
 hold on
 plot(mean(single_travels_60'))
 plot(mean(multi_travels_60_10')/10)
