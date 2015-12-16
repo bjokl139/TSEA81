@@ -1,5 +1,6 @@
 %% Gather data
-%Must be run on a Linux machine with
+%Must be run on a Linux machine. Takes about 15 minutes on a laptop with an
+%i7. OVERWIRTES CONTENT IN data FOLDER!!!
 passengers = [5 10 20 30 40 50 60];
 
 for it = passengers
@@ -111,13 +112,53 @@ load multi_travels_40_50.txt
 load multi_travels_50_50.txt
 load multi_travels_60_50.txt
 
-load multi_travels_5_100_onecpu.txt
-load multi_travels_10_100_onecpu.txt
-load multi_travels_20_100_onecpu.txt
-load multi_travels_30_100_onecpu.txt
-load multi_travels_40_100_onecpu.txt
-load multi_travels_50_100_onecpu.txt
-load multi_travels_60_100_onecpu.txt
+load multi_travels_5_100.txt
+load multi_travels_10_100.txt
+load multi_travels_20_100.txt
+load multi_travels_30_100.txt
+load multi_travels_40_100.txt
+load multi_travels_50_100.txt
+load multi_travels_60_100.txt
+
+load one_cv_5_onecpu.txt
+load one_cv_10_onecpu.txt
+load one_cv_20_onecpu.txt
+load one_cv_30_onecpu.txt
+load one_cv_40_onecpu.txt
+load one_cv_50_onecpu.txt
+load one_cv_60_onecpu.txt
+
+load many_cv_5_onecpu.txt
+load many_cv_10_onecpu.txt
+load many_cv_20_onecpu.txt
+load many_cv_30_onecpu.txt
+load many_cv_40_onecpu.txt
+load many_cv_50_onecpu.txt
+load many_cv_60_onecpu.txt
+
+load single_travels_5_onecpu.txt
+load single_travels_10_onecpu.txt
+load single_travels_20_onecpu.txt
+load single_travels_30_onecpu.txt
+load single_travels_40_onecpu.txt
+load single_travels_50_onecpu.txt
+load single_travels_60_onecpu.txt
+
+load multi_travels_5_10_onecpu.txt
+load multi_travels_10_10_onecpu.txt
+load multi_travels_20_10_onecpu.txt
+load multi_travels_30_10_onecpu.txt
+load multi_travels_40_10_onecpu.txt
+load multi_travels_50_10_onecpu.txt
+load multi_travels_60_10_onecpu.txt
+
+load multi_travels_5_50_onecpu.txt
+load multi_travels_10_50_onecpu.txt
+load multi_travels_20_50_onecpu.txt
+load multi_travels_30_50_onecpu.txt
+load multi_travels_40_50_onecpu.txt
+load multi_travels_50_50_onecpu.txt
+load multi_travels_60_50_onecpu.txt
 
 passengers = [5 10 20 30 40 50 60];
 %% Mean travel times
@@ -145,19 +186,16 @@ mean_multi_travels_100 = [mean(mean(multi_travels_5_100)), mean(mean(multi_trave
     mean(mean(multi_travels_30_100)), mean(mean(multi_travels_40_100)),...
     mean(mean(multi_travels_50_100)), mean(mean(multi_travels_60_100))]/100;
 
-
-
-
 figure(1)
 plot(passengers,[mean_one_cv; mean_many_cv])
-title('Genomsnittlig restid med tr�dar (4 k�rnor)')
+title('Genomsnittlig restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
-legend('En CV', 'En CV per v�ning')
+legend('En CV', 'En CV per våning')
 
 figure(2)
 plot(passengers,[mean_single_travels; mean_multi_travels_10; mean_multi_travels_50; mean_multi_travels_100])
-title('Genomsnittlig restid med processer (4 k�rnor)')
+title('Genomsnittlig restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
@@ -190,19 +228,19 @@ std_multi_travels_100 = [mean(std(multi_travels_5_100'/100)), mean(std(multi_tra
 
 figure(3)
 plot(passengers, [std_one_cv; std_many_cv])
-title('Restidens standardavvikelse med tr�dar (4 k�rnor)')
+title('Restidens standardavvikelse med trådar (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Genomsnittlig standardavvikelse')
-legend('En CV', 'En CV per v�ning')
+legend('En CV', 'En CV per våning')
 
 figure(4)
 plot(passengers,[std_single_travels; std_multi_travels_10; std_multi_travels_50; std_multi_travels_100])
-title('Restidens standardavvikelse med processer (4 k�rnor)')
+title('Restidens standardavvikelse med processer (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Genomsnittlig standardavvikelse')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
-%% Max travel time
+%% Max travel time, INTETSÄGANDE!!!
 max_one_cv = [max(max(one_cv_5)), max(max(one_cv_10)), max(max(one_cv_20)), ... 
     max(max(one_cv_30)), max(max(one_cv_40)), ... 
     max(max(one_cv_50)), max(max(one_cv_60))];
@@ -217,35 +255,33 @@ max_single_travels = [max(max(single_travels_5)), max(max(single_travels_10)), m
 
 max_multi_travels_10 = [max(max(multi_travels_5_10)), max(max(multi_travels_10_10)), max(max(multi_travels_20_10)), ... 
     max(max(multi_travels_30_10)), max(max(multi_travels_40_10)), ... 
-    max(max(multi_travels_50_10)), max(max(multi_travels_60_10))];
+    max(max(multi_travels_50_10)), max(max(multi_travels_60_10))]/10;
 
 max_multi_travels_50 = [max(max(multi_travels_5_50)), max(max(multi_travels_10_50)), max(max(multi_travels_20_50)), ... 
     max(max(multi_travels_30_50)), max(max(multi_travels_40_50)), ... 
-    max(max(multi_travels_50_50)), max(max(multi_travels_60_50))];
+    max(max(multi_travels_50_50)), max(max(multi_travels_60_50))]/50;
 
 max_multi_travels_100 = [max(max(multi_travels_5_100)), max(max(multi_travels_10_100)), max(max(multi_travels_20_100)), ... 
     max(max(multi_travels_30_100)), max(max(multi_travels_40_100)), ... 
-    max(max(multi_travels_50_100)), max(max(multi_travels_60_100))];
-
-
+    max(max(multi_travels_50_100)), max(max(multi_travels_60_100))]/100;
 
 figure(5)
 plot(passengers,[max_one_cv; max_many_cv])
-title('Maximal restid med tr�dar (4 k�rnor)')
+title('Maximal restid med trådar (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
-legend('En CV', 'En CV per v�ning')
+legend('En CV', 'En CV per våning')
 
 figure(6)
 plot(passengers,[max_single_travels; max_multi_travels_10; max_multi_travels_50; max_multi_travels_100])
-title('Maximal restid med processer (4 k�rnor)')
+title('Maximal restid med processer (4 kärnor)')
 xlabel('Antal passagerare')
 ylabel('Restid [\mus]')
 legend('1 resa per meddelande','10 resa per meddelande','50 resa per meddelande','100 resa per meddelande');
 
 %% Mean travel time for each person
 figure(7)
-title('Medelrestid f�r var person, tr�dar (4 k�rnor)')
+title('Medelrestid för var person, trådar (4 kärnor)')
 hold on
 plot(mean(one_cv_5'));
 plot(mean(one_cv_10'));
@@ -272,7 +308,7 @@ hold off
 
 figure(8)
 clf;
-title('Medelrestid f�r var person, processer (4 k�rnor)')
+title('Medelrestid för var person, processer (4 kärnor)')
 hold on
 plot(mean(single_travels_60'))
 plot(mean(multi_travels_60_10')/10)
@@ -286,3 +322,44 @@ ylabel('Restid [\mus]')
 axis([0 60 10 1000]);
 hold off
 
+%% One core
+mean_one_cv_onecpu = [mean(mean(one_cv_5_onecpu)), mean(mean(one_cv_10_onecpu)), mean(mean(one_cv_20_onecpu)),...
+    mean(mean(one_cv_30_onecpu)), mean(mean(one_cv_40_onecpu)),...
+    mean(mean(one_cv_50_onecpu)), mean(mean(one_cv_60_onecpu))];
+
+mean_many_cv_onecpu = [mean(mean(many_cv_5_onecpu)), mean(mean(many_cv_10_onecpu)), mean(mean(many_cv_20_onecpu)),...
+    mean(mean(many_cv_30_onecpu)), mean(mean(many_cv_40_onecpu)),...
+    mean(mean(many_cv_50_onecpu)), mean(mean(many_cv_60_onecpu))];
+
+mean_single_travels_onecpu = [mean(mean(single_travels_5_onecpu)), mean(mean(single_travels_10_onecpu)), mean(mean(single_travels_20_onecpu)),...
+    mean(mean(single_travels_30_onecpu)), mean(mean(single_travels_40_onecpu)),...
+    mean(mean(single_travels_50_onecpu)), mean(mean(single_travels_60_onecpu))];
+
+mean_multi_travels_10_onecpu = [mean(mean(multi_travels_5_10_onecpu)), mean(mean(multi_travels_10_10_onecpu)), mean(mean(multi_travels_20_10_onecpu)),...
+    mean(mean(multi_travels_30_10_onecpu)), mean(mean(multi_travels_40_10_onecpu)),...
+    mean(mean(multi_travels_50_10_onecpu)), mean(mean(multi_travels_60_10_onecpu))]/10;
+
+figure(9)
+clf;
+hold on;
+plot(passengers,[mean_one_cv; mean_many_cv])
+ax = gca;
+ax.ColorOrderIndex = 1;
+plot(passengers,[mean_one_cv_onecpu; mean_many_cv_onecpu], '--')
+title('Genomsnittlig restid med trådar')
+xlabel('Antal passagerare')
+ylabel('Restid [\mus]')
+legend('En CV, 4 kärnor', 'En CV per våning, 4 kärnor', 'En CV, 1 kärna', 'En CV per våning, 1 kärna')
+hold off
+
+figure(10)
+clf;
+hold on;
+plot(passengers,[mean_single_travels; mean_multi_travels_10;])
+ax = gca;
+ax.ColorOrderIndex = 1;
+plot(passengers,[mean_single_travels_onecpu; mean_multi_travels_10_onecpu],'--')
+title('Genomsnittlig restid med processer')
+xlabel('Antal passagerare')
+ylabel('Restid [\mus]')
+legend('1 resa per meddelande, fyra kärnor','10 resor per meddelande, fyra kärnor','1 resa per meddelande, en kärna','10 resor per meddelande, en kärna');
